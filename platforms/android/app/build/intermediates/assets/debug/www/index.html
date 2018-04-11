@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Hello MUI</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <!--标准mui.css-->
+    <link rel="stylesheet" href="css/mui.min.css">
+    <!--App自定义的css mui-active-->
+    <style type="text/css">
+    input.jam-task-input {
+        border: 0px;
+        padding: 0px;
+        margin: 0px
+    }
+
+    .jam-option-btn-group {
+        letter-spacing: -4px;
+    }
+
+    .jam-option-btn-group>span {
+        letter-spacing: 0px;
+        border-radius: 0;
+    }
+    </style>
+</head>
+
+<body>
+    <style>
+    .mui-control-content {
+        background-color: white;
+        min-height: 215px;
+    }
+
+    .mui-control-content .mui-loading {
+        margin-top: 50px;
+    }
+    </style>
+    <header class="mui-bar mui-bar-nav">
+        <h1 class="mui-title">Now and Tomorrow</h1>
+    </header>
+    <nav class="mui-bar mui-bar-tab" id="nav-app">
+        <a class="mui-tab-item mui-active" href="#tabbar" @tap="switchToCompleted()">
+                <span class="mui-icon mui-icon-checkmarkempty"></span>
+                <span class="mui-tab-label">Done</span>
+            </a>
+        <a class="mui-tab-item" href="#tabbar-with-chat" @tap="switchToDeleted()">
+                <span class="mui-icon mui-icon-trash"></span>
+                <span class="mui-tab-label">Deleted</span>
+            </a>
+    </nav>
+    <div class="mui-content" id="app">
+        <div id="slider" class="mui-slider">
+            <div id="sliderSegmentedControl" class="mui-slider-indicator mui-segmented-control mui-segmented-control-inverted">
+                <a class="mui-control-item" :href="'#div-' + category " v-for="(tasklist , category) in taskStore" @tap="switchToCategory(category)">
+                {{ tasklist.displayName}}
+            </a>
+            </div>
+            <div id="sliderProgressBar" class="mui-slider-progress-bar mui-col-xs-4"></div>
+            <div class="mui-slider-group">
+                <div v-for="(tasklist , category) in taskStore" :id="'div-'+ category " class="mui-slider-item mui-control-content  " v-bind:class="[{ 'mui-active': currentCategory == category }]">
+                    <ul class="mui-table-view ul-tasks" v-if="category=='history'">
+                        <li class="mui-table-view-cell" v-for="(task,index )  in tasklist[tasklist.currentList] ">
+                            <div class="mui-slider-right mui-disabled">
+                                <a class="mui-btn mui-btn-yellow" @click="moveTo(task,index, 'tomorrow' ,$event) ">Add to Tomorrow</a>
+                                <a class="mui-btn mui-btn-green" @click="moveTo(task,index,  'today' , $event  ) ">Add to Today</a>
+                            </div>
+                            <div class="mui-slider-handle">
+                                <input type="text" v-model="task.name" class="mui-input-clear jam-task-input" placeholder="">
+                            </div>
+                        </li>
+                    </ul>
+                    <ul class="mui-table-view ul-tasks" v-if="category!='history'">
+                        <li class="mui-table-view-cell" v-for="(task,index )  in tasklist.tasks ">
+                            <div class="mui-slider-left mui-disabled">
+                                <a class="mui-btn mui-btn-red" @click="deleteTask(task,index,tasklist,$event)">Delete</a>
+                            </div>
+                            <div class="mui-slider-right mui-disabled">
+                                <a class="mui-btn mui-btn-green" @click="done(task,index,tasklist , $event ) ">Done</a>
+                            </div>
+                            <div class="mui-slider-handle">
+                                <input type="text" v-model="task.name" class="mui-input-clear jam-task-input" placeholder="">
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div id="popover" class="mui-popover">
+            <ul class="mui-table-view">
+                <li class="mui-table-view-cell"><a href="#">Item1</a></li>
+                <li class="mui-table-view-cell"><a href="#">Item2</a></li>
+                <li class="mui-table-view-cell"><a href="#">Item3</a></li>
+                <li class="mui-table-view-cell"><a href="#">Item4</a></li>
+                <li class="mui-table-view-cell"><a href="#">Item5</a></li>
+            </ul>
+        </div>
+    </div>
+    <script type="text/javascript" src="cordova.js"></script>
+    <script type="text/javascript" src="js/db.js"></script>
+    <script type="text/javascript" src="js/index.js"></script>
+    <script src="js/mui.min.js"></script>
+    <script src="js/vue.js"></script>
+    <script>
+    function Task(name, date) {
+
+        this.date = date
+        this.name = name
+
+    }
+
+    //document.addEventListener('deviceready', initVue, false);
+    var app = null;
+    var navApp = null;
+
+    function doInitVue() {
+
+
+        console.log("doInitVue")
+        app = new Vue({
+            el: '#app',
+            data: {
+                currentCategory: 'today',
+                taskStore: {
+                    "history": {
+                        "displayName": "History",
+                        "currentList": 'completedTasks',
+                        "completedTasks": [
+                            new Task("Hisotry task1 ", new Date()),
+                            new Task("Hisotry task2 ", new Date()),
+                            new Task("Hisotry task3 ", new Date()),
+                            new Task("Hisotry task4 ", new Date())
+                            /*,
+                            new Task("Hisotry task1 ", new Date()),
+                            new Task("Hisotry task2 ", new Date()),
+                            new Task("Hisotry task3 ", new Date()),
+                            new Task("Hisotry task4 ", new Date()),
+                            new Task("Hisotry task1 ", new Date()),
+                            new Task("Hisotry task2 ", new Date()),
+                            new Task("Hisotry task3 ", new Date()),
+                            new Task("Hisotry task4 ", new Date()),
+                            new Task("Hisotry task1 ", new Date()),
+                            new Task("Hisotry task2 ", new Date()),
+                            new Task("Hisotry task3 ", new Date()),
+                            new Task("Hisotry task4 ", new Date())
+                            */
+
+
+                        ],
+                        "deletedTasks": [
+                            new Task("Deleted task1 ", new Date()),
+                            new Task("Deleted task2 ", new Date()),
+                            new Task("Deleted task3 ", new Date()),
+                            new Task("Deleted task4 ", new Date()),
+                            new Task("Deleted task1 ", new Date()),
+                            new Task("Deleted task2 ", new Date()),
+                            new Task("Deleted task3 ", new Date()),
+                            new Task("Deleted task4 ", new Date()),
+                            new Task("Deleted task1 ", new Date()),
+                            new Task("Deleted task2 ", new Date()),
+                            new Task("Deleted task3 ", new Date()),
+                            new Task("Deleted task4 ", new Date()),
+                            new Task("Deleted task1 ", new Date()),
+                            new Task("Deleted task2 ", new Date()),
+                            new Task("Deleted task3 ", new Date()),
+                            new Task("Deleted task14 ", new Date())
+                        ],
+                    },
+                    "today": {
+                        "displayName": "Today",
+
+                        "tasks": [new Task("Today task1 ", new Date()),
+                            new Task("Today task2 ", new Date()),
+                            new Task("Today task3 ", new Date()),
+                            new Task("Today task4 ", new Date())
+                        ]
+                    },
+
+                    "tomorrow": {
+                        "displayName": "Tomorrow",
+
+                        "tasks": [
+                            new Task("Tomorrow task1 ", new Date()),
+                            new Task("Tomorrow task2 ", new Date()),
+                            new Task("Tomorrow task3 ", new Date()),
+                            new Task("Tomorrow task4 ", new Date())
+                        ]
+
+                    },
+                }
+
+            },
+            methods: {
+                done(task, index, tasklist, event) {
+
+                    mui.toast("Task Completed , You can get it back in history list ");
+                    mui.swipeoutClose(event.target.parentNode.parentNode);
+
+                    tasklist.tasks.splice(index, 1);
+                    this.taskStore['history'].completedTasks.splice(0, 0, task);
+
+
+                },
+                deleteTask(task, index, tasklist, event) {
+                    mui.toast("Task Deleted , You can get it back in garbage list ");
+                    mui.swipeoutClose(event.target.parentNode.parentNode);
+                    tasklist.tasks.splice(index, 1);
+                    this.taskStore['history'].deletedTasks.splice(0, 0, task);
+                },
+                moveTo(task, index, targetCategory, event) {
+
+                    mui.toast("Task moved to " + this.taskStore[targetCategory].displayName);
+                    mui.swipeoutClose(event.target.parentNode.parentNode);
+                    var self = this;
+
+                    var historyList = self.taskStore['history']
+                    historyList[historyList.currentList].splice(index, 1);
+                    self.taskStore[targetCategory].tasks.splice(0, 0, task);
+
+                },
+                switchToCategory(category) {
+                    this.currentCategory = category;
+                    if (category !== 'history') {
+                        document.getElementById('nav-app').style.display = "none"
+                    } else {
+                        document.getElementById('nav-app').style.display = "table"
+                    }
+                }
+
+            }
+        });
+
+        navApp = new Vue({
+            el: '#nav-app',
+            methods: {
+                switchToDeleted() {
+                    app.$data.taskStore['history'].currentList = 'deletedTasks'
+                },
+                switchToCompleted() {
+                    app.$data.taskStore['history'].currentList = 'completedTasks'
+                }
+
+
+            }
+        })
+
+        mui.init({
+            swipeBack: false
+        });
+        (function($) {
+            $('.mui-scroll-wrapper').scroll({
+                indicators: true //是否显示滚动条
+            });
+            var html2 = '<ul class="mui-table-view"><li class="mui-table-view-cell">第二个选项卡子项-1</li><li class="mui-table-view-cell">第二个选项卡子项-2</li><li class="mui-table-view-cell">第二个选项卡子项-3</li><li class="mui-table-view-cell">第二个选项卡子项-4</li><li class="mui-table-view-cell">第二个选项卡子项-5</li></ul>';
+            var html3 = '<ul class="mui-table-view"><li class="mui-table-view-cell">第三个选项卡子项-1</li><li class="mui-table-view-cell">第三个选项卡子项-2</li><li class="mui-table-view-cell">第三个选项卡子项-3</li><li class="mui-table-view-cell">第三个选项卡子项-4</li><li class="mui-table-view-cell">第三个选项卡子项-5</li></ul>';
+            var item2 = document.getElementById('item2mobile');
+            var item3 = document.getElementById('item3mobile');
+            /*  document.getElementById('slider').addEventListener('slide', function(e) {
+                  if (e.detail.slideNumber === 1) {
+                      if (item2.querySelector('.mui-loading')) {
+                          setTimeout(function() {
+                              item2.querySelector('.mui-scroll').innerHTML = html2;
+                          }, 500);
+                      }
+                  } else if (e.detail.slideNumber === 2) {
+                      if (item3.querySelector('.mui-loading')) {
+                          setTimeout(function() {
+                              item3.querySelector('.mui-scroll').innerHTML = html3;
+                          }, 500);
+                      }
+                  }
+              });*/
+
+            $('#OA_task_2').on('slideleft', '.mui-table-view-cell', function(event) {
+                alert('ok left ');
+
+            });
+
+
+        })(mui);
+    }
+
+    function initVue() {
+        myDB.init().then(
+            function(db) {
+                console.log("nice db up  ");
+                 doInitVue();
+            },
+            function(err) {
+                //TODO : handel error 
+                doInitVue();
+            }
+        );
+
+    }
+    // doInitVue()
+    initVue();
+    </script>
+</body>
+
+</html>

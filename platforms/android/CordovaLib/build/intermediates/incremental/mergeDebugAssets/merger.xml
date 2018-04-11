@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merger version="3"><dataSet config="main"><source path="/Users/mistapostle/Jam/mui/For_tomorrow/for_tomorrow/platforms/android/CordovaLib/assets"/><source path="/Users/mistapostle/Jam/mui/For_tomorrow/for_tomorrow/platforms/android/CordovaLib/build/generated/assets/shaders/debug"/></dataSet><dataSet config="debug"><source path="/Users/mistapostle/Jam/mui/For_tomorrow/for_tomorrow/platforms/android/CordovaLib/src/debug/assets"/></dataSet></merger>
