@@ -125,12 +125,21 @@ var myDB = (function() {
 						});
 
 				},
-				fetchTasks(table, rowCount, offset) {
+				fetchTasks(table, firstPlanDate, rowCount, offset) {
+					var wherecause = " ";
+					if (firstPlanDate != null) {
+						wherecause = firstPlanDate == "today" ? " where firstPlanDate <= '" + getNow() + "'" :
+							" where firstPlanDate > '" + getNow() + "'";
+					}
 					var orderField = table == 'tbl_task' ? 'firstPlanDate' : 'closeDate';
-					db.executeSql("SELECT  * from " + table + " order by " + orderField + " ASC LIMIT ? OFFSET ?", [rowCount, offset], function(resultSet) {
-						//emmit result  resultSet.rows.item(0).stringlength)
+					db.executeSql("SELECT  * from " + table + wherecause + " order by " + orderField + " ASC LIMIT ? OFFSET ?", [rowCount, offset], function(resultSet) {
+						var data = [];
+						for (var i = 0; i < resultSet.rows.length; i++) {
+							data.push(new Task(resultSet.rows.item(i).name, resultSet.rows.item(i).firstPlanDate));
+						}
+						$ee.trigger("fetchToday", [data]);
 
-						;
+
 					}, function(error) {
 						console.log('SELECT error: ' + error.message);
 					});

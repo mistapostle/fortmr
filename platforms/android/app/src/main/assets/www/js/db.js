@@ -125,9 +125,14 @@ var myDB = (function() {
 						});
 
 				},
-				fetchTasks(table, rowCount, offset) {
+				fetchTasks(table, firstPlanDate, rowCount, offset) {
+					var wherecause = " ";
+					if (firstPlanDate != null) {
+						wherecause = firstPlanDate == "today" ? " where firstPlanDate <= '" + getNow() + "'" :
+							" where firstPlanDate > '" + getNow() + "'";
+					}
 					var orderField = table == 'tbl_task' ? 'firstPlanDate' : 'closeDate';
-					db.executeSql("SELECT  * from " + table + " order by " + orderField + " ASC LIMIT ? OFFSET ?", [rowCount, offset], function(resultSet) {
+					db.executeSql("SELECT  * from " + table + wherecause + " order by " + orderField + " ASC LIMIT ? OFFSET ?", [rowCount, offset], function(resultSet) {
 						//emmit result  resultSet.rows.item(0).stringlength)
 
 						;
