@@ -5,7 +5,8 @@ function Task(name, date) {
 
 }
 
-//document.addEventListener('deviceready', initVue, false);
+var $ee = new EventEmitter();
+document.addEventListener('deviceready', initDB, false); //TODO , check if  device have been ready
 var app = null;
 var navApp = null;
 
@@ -83,6 +84,15 @@ app = new Vue({
 
 	},
 	methods: {
+		initDB() {
+			ee.on("fetchToday", this.loadToday);
+
+			myDB.fetchTasks("tbl_tasks", "today", 200, 0);
+		},
+		loadToday(data) {
+			this.tasksStore.today.tasks = data;
+		},
+
 		done(task, index, tasklist, event) {
 
 			mui.toast("Task Completed , You can get it back in history list ");
