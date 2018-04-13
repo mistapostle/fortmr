@@ -84,13 +84,19 @@ app = new Vue({
 
 	},
 	methods: {
-		initDB() {
-			ee.on("fetchToday", this.loadToday);
-
-			myDB.fetchTasks("tbl_tasks", "today", 200, 0);
+		initDB(db) {
+			$ee.on("fetchToday", this.loadToday.bind(this));
+			console.log("now start fetchTasks ");
+			db.fetchTasks("tbl_task", "today", 200, 0);
 		},
 		loadToday(data) {
-			this.tasksStore.today.tasks = data;
+
+			console.log("now loadToday ", this.taskStore.today.tasks, data);
+
+			//this.taskStore.today.tasks.splice(0, this.taskStore.today.tasks.length, data);
+			Vue.set(this.taskStore.today, "tasks", data)
+			console.log("now loadToday 2", this.taskStore.today.tasks, data);
+
 		},
 
 		done(task, index, tasklist, event) {
@@ -182,8 +188,10 @@ mui.init({
 })(mui);
 
 function initDB() {
+	console.log("now initDB db");
 	myDB.init().then(
 		function(db) {
+			console.log("now initDB db done");
 			app.initDB(db);
 		},
 		function(err) {

@@ -69,7 +69,7 @@ var myDB = (function() {
 
 			function dateToYMD(date) {
 				var d = date.getDate();
-				var m = strArray[date.getMonth()];
+				var m = date.getMonth();
 				var y = date.getFullYear();
 				return y + (m <= 9 ? '0' + m : m) + (d <= 9 ? '0' + d : d);
 			}
@@ -148,6 +148,7 @@ var myDB = (function() {
 			console.log("what version now ? " + getDBVersion())
 			if (getDBVersion() == DB_VERSION) {
 
+				resolve(returnObject);
 
 
 			} else {

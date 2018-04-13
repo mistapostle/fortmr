@@ -5,7 +5,8 @@ function Task(name, date) {
 
 }
 
-//document.addEventListener('deviceready', initVue, false);
+var $ee = new EventEmitter();
+document.addEventListener('deviceready', initDB, false); //TODO , check if  device have been ready
 var app = null;
 var navApp = null;
 
@@ -83,6 +84,21 @@ app = new Vue({
 
 	},
 	methods: {
+		initDB(db) {
+			$ee.on("fetchToday", this.loadToday.bind(this));
+			console.log("now start fetchTasks ");
+			db.fetchTasks("tbl_task", "today", 200, 0);
+		},
+		loadToday(data) {
+
+			console.log("now loadToday ", this.taskStore.today.tasks, data);
+
+			//this.taskStore.today.tasks.splice(0, this.taskStore.today.tasks.length, data);
+			Vue.set(this.taskStore.today, "tasks", data)
+			console.log("now loadToday 2", this.taskStore.today.tasks, data);
+
+		},
+
 		done(task, index, tasklist, event) {
 
 			mui.toast("Task Completed , You can get it back in history list ");
@@ -172,8 +188,10 @@ mui.init({
 })(mui);
 
 function initDB() {
+	console.log("now initDB db");
 	myDB.init().then(
 		function(db) {
+			console.log("now initDB db done");
 			app.initDB(db);
 		},
 		function(err) {
