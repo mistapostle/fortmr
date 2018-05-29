@@ -33,11 +33,13 @@
 
         src: url('../fonts/amatic/AmaticSC-Regular.ttf') format('truetype');
     }
-    .jam-title{
+
+    .jam-title {
         font-family: Muiicons;
     }
-    div.jam-tab-content{
-        height: 100vh ;
+
+    div.jam-tab-content {
+        height: 100vh;
     }
     </style>
 </head>
@@ -56,7 +58,7 @@
     <header class="mui-bar mui-bar-nav">
         <h1 class="mui-title jam-title">Now and Tomorrow</h1>
     </header>
-    <nav class="mui-bar mui-bar-tab" id="nav-app">
+    <nav class="mui-bar mui-bar-tab" id="nav-history">
         <a class="mui-tab-item mui-active" href="#tabbar" @tap="switchToCompleted()">
                 <span class="mui-icon mui-icon-checkmarkempty"></span>
                 <span class="mui-tab-label">Done</span>
@@ -66,6 +68,10 @@
                 <span class="mui-tab-label">Deleted</span>
             </a>
     </nav>
+    <nav class="mui-bar mui-bar-tab" id="nav-new">
+        <input type="text" v-model="task.name" class="mui-input-clear jam-task-input" style=" width: calc(100% - 55px); margin-top:5px" placeholder="">
+        <button type="button" class="mui-btn mui-btn-success">绿色</button>
+    </nav>
     <div class="mui-content" id="app">
         <div id="slider" class="mui-slider">
             <div id="sliderSegmentedControl" class="mui-slider-indicator mui-segmented-control mui-segmented-control-inverted">
@@ -74,7 +80,7 @@
             </a>
             </div>
             <div id="sliderProgressBar" class="mui-slider-progress-bar mui-col-xs-4"></div>
-            <div class="mui-slider-group jam-tab-content" >
+            <div class="mui-slider-group jam-tab-content">
                 <div v-for="(tasklist , category) in taskStore" :id="'div-'+ category " class="mui-slider-item mui-control-content  " v-bind:class="[{ 'mui-active': currentCategory == category }]">
                     <ul class="mui-table-view ul-tasks" v-if="category=='history'">
                         <li class="mui-table-view-cell" v-for="(task,index )  in tasklist[tasklist.currentList] ">
@@ -103,10 +109,9 @@
                 </div>
             </div>
         </div>
-         
     </div>
     <script type="text/javascript" src="cordova.js"></script>
-    <script type="text/javascript" src="js/EventEmitter-4.0.3.min.js" ></script>
+    <script type="text/javascript" src="js/EventEmitter-4.0.3.min.js"></script>
     <script type="text/javascript" src="js/db.js"></script>
     <script type="text/javascript" src="js/index.js"></script>
     <script src="js/mui.min.js"></script>

@@ -69,7 +69,7 @@ var myDB = (function() {
 
 			function dateToYMD(date) {
 				var d = date.getDate();
-				var m = strArray[date.getMonth()];
+				var m = date.getMonth();
 				var y = date.getFullYear();
 				return y + (m <= 9 ? '0' + m : m) + (d <= 9 ? '0' + d : d);
 			}
@@ -125,20 +125,22 @@ var myDB = (function() {
 						});
 
 				},
-				fetchTasks(table, firstPlanDate, rowCount, offset) {
+				fetchTasks(callback, table, firstPlanDate, rowCount, offset) {
 					var wherecause = " ";
 					if (firstPlanDate != null) {
 						wherecause = firstPlanDate == "today" ? " where firstPlanDate <= '" + getNow() + "'" :
 							" where firstPlanDate > '" + getNow() + "'";
 					}
+
 					var orderField = table == 'tbl_task' ? 'firstPlanDate' : 'closeDate';
 					db.executeSql("SELECT  * from " + table + wherecause + " order by " + orderField + " ASC LIMIT ? OFFSET ?", [rowCount, offset], function(resultSet) {
 						var data = [];
 						for (var i = 0; i < resultSet.rows.length; i++) {
 							data.push(new Task(resultSet.rows.item(i).name, resultSet.rows.item(i).firstPlanDate));
 						}
-						$ee.trigger("fetchToday", [data]);
-
+						//$ee.trigger("fetchToday", [data]);
+						console.log("call callback", data)
+						callback(data)
 
 					}, function(error) {
 						console.log('SELECT error: ' + error.message);
@@ -148,6 +150,7 @@ var myDB = (function() {
 			console.log("what version now ? " + getDBVersion())
 			if (getDBVersion() == DB_VERSION) {
 
+				resolve(returnObject);
 
 
 			} else {

@@ -85,17 +85,26 @@ app = new Vue({
 	},
 	methods: {
 		initDB(db) {
-			$ee.on("fetchToday", this.loadToday.bind(this));
+			var self = this
+			//$ee.on("fetchToday", this.loadToday.bind(this));
 			console.log("now start fetchTasks ");
-			db.fetchTasks("tbl_task", "today", 200, 0);
-		},
-		loadToday(data) {
+			db.fetchTasks(function(data) {
+					self.onLoadData("today", "tasks", data)
+				},
+				"tbl_task", "today", 200, 0);
+			db.fetchTasks(function(data) {
+					self.onLoadData("tomorrow", "tasks", data)
+				},
+				"tbl_task", "tomorrow", 200, 0);
 
-			console.log("now loadToday ", this.taskStore.today.tasks, data);
+		},
+		onLoadData(target, subTarget, data) {
+
+			console.log("now loadToday ", this.taskStore[target][subTarget], data);
 
 			//this.taskStore.today.tasks.splice(0, this.taskStore.today.tasks.length, data);
-			Vue.set(this.taskStore.today, "tasks", data)
-			console.log("now loadToday 2", this.taskStore.today.tasks, data);
+			Vue.set(this.taskStore[target], subTarget, data)
+			console.log("now loadToday 2", this.taskStore[target][subTarget], data);
 
 		},
 
@@ -129,9 +138,11 @@ app = new Vue({
 		switchToCategory(category) {
 			this.currentCategory = category;
 			if (category !== 'history') {
-				document.getElementById('nav-app').style.display = "none"
+				document.getElementById('nav-history').style.display = "none"
+				document.getElementById('nav-new').style.display = "table"
 			} else {
-				document.getElementById('nav-app').style.display = "table"
+				document.getElementById('nav-history').style.display = "table"
+				document.getElementById('nav-new').style.display = "none"
 			}
 		}
 
@@ -139,7 +150,7 @@ app = new Vue({
 });
 
 navApp = new Vue({
-	el: '#nav-app',
+	el: '#nav-history',
 	methods: {
 		switchToDeleted() {
 			app.$data.taskStore['history'].currentList = 'deletedTasks'
@@ -151,6 +162,8 @@ navApp = new Vue({
 
 	}
 })
+
+app.switchToCategory('today')
 
 mui.init({
 	swipeBack: false
