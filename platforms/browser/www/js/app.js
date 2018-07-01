@@ -86,17 +86,28 @@ app = new Vue({
 	methods: {
 		initDB(db) {
 			var self = this
+			this.db = db
 			//$ee.on("fetchToday", this.loadToday.bind(this));
 			console.log("now start fetchTasks ");
+			this.fetchTasks('today');
+			this.fetchTasks('tomorrow');
+			this.fetchTasks('history', 'completedTasks');
+			this.fetchTasks('history', 'deletedTasks');
+		},
+		fetchTasks(category, subCategory) {
+			var self = this
+			table = category == 'history' ? (subCategory == 'completedTasks' ? 'tbl_task_completed' : 'tbl_task_deleted') : 'tbl_task';
+			subCategory = subCategory ? subCategory : "tasks";
 			db.fetchTasks(function(data) {
-					self.onLoadData("today", "tasks", data)
+					self.onLoadData(category, subCategory, data)
 				},
-				"tbl_task", "today", 200, 0);
-			db.fetchTasks(function(data) {
-					self.onLoadData("tomorrow", "tasks", data)
-				},
-				"tbl_task", "tomorrow", 200, 0);
-
+				table, category, 200, 0);
+		},
+		addTask(name) {
+			var self = this;
+			this.db.addTask(name, this.currentCategory == 'today', function() {
+				self.fetchTasks(this.currentCategory);
+			})
 		},
 		onLoadData(target, subTarget, data) {
 
@@ -154,6 +165,24 @@ navApp = new Vue({
 	methods: {
 		switchToDeleted() {
 			app.$data.taskStore['history'].currentList = 'deletedTasks'
+		},
+		switchToCompleted() {
+			app.$data.taskStore['history'].currentList = 'completedTasks'
+		}
+
+
+	}
+})
+
+
+navNewApp = new Vue({
+	el: '#nav-new',
+	data: {
+		task: ""
+	},
+	methods: {
+		add() {
+			app.addTask(this.task);
 		},
 		switchToCompleted() {
 			app.$data.taskStore['history'].currentList = 'completedTasks'

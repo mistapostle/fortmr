@@ -1,5 +1,5 @@
-function Task(name, date) {
-
+function Task(name, date, taskId) {
+	this.taskId = taskId
 	this.date = date
 	this.name = name
 
@@ -86,21 +86,37 @@ app = new Vue({
 	methods: {
 		initDB(db) {
 			var self = this
+			this.db = db
 			//$ee.on("fetchToday", this.loadToday.bind(this));
 			console.log("now start fetchTasks ");
-			db.fetchTasks(function(data) {
-					self.onLoadData("today", "tasks", data)
+			this.fetchTasks('today');
+			this.fetchTasks('tomorrow');
+			this.fetchTasks('history', 'completedTasks');
+			this.fetchTasks('history', 'deletedTasks');
+		},
+		fetchTasks(category, subCategory) {
+			var self = this
+			table = category == 'history' ? (subCategory == 'completedTasks' ? 'tbl_task_completed' : 'tbl_task_deleted') : 'tbl_task';
+			subCategory = subCategory ? subCategory : "tasks";
+			this.db.fetchTasks(function(data) {
+					self.onLoadData(category, subCategory, data)
 				},
-				"tbl_task", "today", 200, 0);
-			db.fetchTasks(function(data) {
-					self.onLoadData("tomorrow", "tasks", data)
-				},
-				"tbl_task", "tomorrow", 200, 0);
-
+				table, category, 200, 0);
+		},
+		addTask(name) {
+			var self = this;
+			this.db.addTask(name, this.currentCategory == 'today', function() {
+				self.fetchTasks(self.currentCategory);
+			})
+		},
+		updateTask(task) {
+			this.db.updateTask(task, this.currentCategory == 'history' ?
+				(this.taskStore.history.currentList == 'completedTasks' ? 'tbl_task_completed' : 'tbl_task_deleted') :
+				'tbl_task')
 		},
 		onLoadData(target, subTarget, data) {
 
-			console.log("now loadToday ", this.taskStore[target][subTarget], data);
+			console.log("now loadToday ", target, subTarget, this.taskStore[target][subTarget], data);
 
 			//this.taskStore.today.tasks.splice(0, this.taskStore.today.tasks.length, data);
 			Vue.set(this.taskStore[target], subTarget, data)
@@ -112,7 +128,7 @@ app = new Vue({
 
 			mui.toast("Task Completed , You can get it back in history list ");
 			mui.swipeoutClose(event.target.parentNode.parentNode);
-
+			this.db.doneTask(tasklist.tasks[index].taskId);
 			tasklist.tasks.splice(index, 1);
 			this.taskStore['history'].completedTasks.splice(0, 0, task);
 
@@ -121,6 +137,7 @@ app = new Vue({
 		deleteTask(task, index, tasklist, event) {
 			mui.toast("Task Deleted , You can get it back in garbage list ");
 			mui.swipeoutClose(event.target.parentNode.parentNode);
+			this.db.deleteTask(tasklist.tasks[index].taskId);
 			tasklist.tasks.splice(index, 1);
 			this.taskStore['history'].deletedTasks.splice(0, 0, task);
 		},
@@ -131,8 +148,11 @@ app = new Vue({
 			var self = this;
 
 			var historyList = self.taskStore['history']
+			this.db.moveTaskBackTo(task.taskId, historyList.currentList == 'deletedTasks', targetCategory == 'today');
 			historyList[historyList.currentList].splice(index, 1);
 			self.taskStore[targetCategory].tasks.splice(0, 0, task);
+
+
 
 		},
 		switchToCategory(category) {
@@ -154,6 +174,25 @@ navApp = new Vue({
 	methods: {
 		switchToDeleted() {
 			app.$data.taskStore['history'].currentList = 'deletedTasks'
+		},
+		switchToCompleted() {
+			app.$data.taskStore['history'].currentList = 'completedTasks'
+		}
+
+
+	}
+})
+
+
+navNewApp = new Vue({
+	el: '#nav-new',
+	data: {
+		task: ""
+	},
+	methods: {
+		add() {
+			app.addTask(this.task);
+			this.task = ""
 		},
 		switchToCompleted() {
 			app.$data.taskStore['history'].currentList = 'completedTasks'

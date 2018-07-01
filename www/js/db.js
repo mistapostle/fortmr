@@ -69,7 +69,7 @@ var myDB = (function() {
 
 			function dateToYMD(date) {
 				var d = date.getDate();
-				var m = date.getMonth();
+				var m = date.getMonth() + 1;
 				var y = date.getFullYear();
 				return y + (m <= 9 ? '0' + m : m) + (d <= 9 ? '0' + d : d);
 			}
@@ -108,15 +108,44 @@ var myDB = (function() {
 					doneOrDeleteTask(taskId, "tbl_task_deleted")
 
 				},
-				moveTaskBackTo(isDeleted, toToday) {
+				addTask(name, toToday, callback) {
+					var targetDate = toToday ? getNow() : getTomorrow();
+					db.sqlBatch([
+							["insert into  tbl_task (name,firstPlanDate) values ( ? , ? ) ", [name, targetDate]]
+
+						], function() {
+							console.log('addTask to database OK');
+							callback();
+
+						},
+						function(error) {
+							console.log('SQL batch ERROR: ' + error.message);
+							//TODO: emmit error 
+						});
+				},
+				updateTask(task, table) {
+					db.sqlBatch([
+							["update " + table + " set name =  ? where taskId = ?  ", [task.name, task.taskId]]
+
+						], function() {
+							console.log('update to database OK');
+
+						},
+						function(error) {
+							console.log('SQL batch ERROR: ' + error.message);
+							//TODO: emmit error 
+						});
+				},
+				moveTaskBackTo(taskId, isDeleted, toToday) {
 					var sourceTable = isDeleted ? "tbl_task_deleted" : "tbl_task_completed";
 					var targetDate = toToday ? getNow() : getTomorrow();
 					db.sqlBatch([
-							["insert into  tbl_task select taskId,name,firstPlanDate from " + sourceTable + " where taskId = ?  ", [getNow, taskId]],
+							["insert into  tbl_task select taskId,name,'" + targetDate + "' from " + sourceTable + " where taskId = ?  ", [taskId]],
 							["delete from " + sourceTable + " where taskId = ? ", [taskId]]
 
 						], function() {
 							console.log('Populated database OK');
+
 
 						},
 						function(error) {
@@ -127,16 +156,18 @@ var myDB = (function() {
 				},
 				fetchTasks(callback, table, firstPlanDate, rowCount, offset) {
 					var wherecause = " ";
-					if (firstPlanDate != null) {
+					if (firstPlanDate != null && firstPlanDate != 'history') {
 						wherecause = firstPlanDate == "today" ? " where firstPlanDate <= '" + getNow() + "'" :
 							" where firstPlanDate > '" + getNow() + "'";
 					}
 
 					var orderField = table == 'tbl_task' ? 'firstPlanDate' : 'closeDate';
-					db.executeSql("SELECT  * from " + table + wherecause + " order by " + orderField + " ASC LIMIT ? OFFSET ?", [rowCount, offset], function(resultSet) {
+					var sql = "SELECT  * from " + table + wherecause + " order by " + orderField + " ASC LIMIT ? OFFSET ?";
+					console.log("fetch with sql ", sql);
+					db.executeSql(sql, [rowCount, offset], function(resultSet) {
 						var data = [];
 						for (var i = 0; i < resultSet.rows.length; i++) {
-							data.push(new Task(resultSet.rows.item(i).name, resultSet.rows.item(i).firstPlanDate));
+							data.push(new Task(resultSet.rows.item(i).name, resultSet.rows.item(i).firstPlanDate, resultSet.rows.item(i).taskId));
 						}
 						//$ee.trigger("fetchToday", [data]);
 						console.log("call callback", data)

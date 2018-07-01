@@ -108,7 +108,21 @@ var myDB = (function() {
 					doneOrDeleteTask(taskId, "tbl_task_deleted")
 
 				},
-				moveTaskBackTo(isDeleted, toToday) {
+				addTask(name, toToday) {
+					var targetDate = toToday ? getNow() : getTomorrow();
+					b.sqlBatch([
+							["insert into  tbl_task (name,firstPlanDate) values ( ? , ? ) ", [name, targetDate]]
+
+						], function() {
+							console.log('Populated database OK');
+
+						},
+						function(error) {
+							console.log('SQL batch ERROR: ' + error.message);
+							//TODO: emmit error 
+						});
+				},
+				moveTaskBackTo(isDeleted, toToday, callback) {
 					var sourceTable = isDeleted ? "tbl_task_deleted" : "tbl_task_completed";
 					var targetDate = toToday ? getNow() : getTomorrow();
 					db.sqlBatch([
@@ -117,6 +131,7 @@ var myDB = (function() {
 
 						], function() {
 							console.log('Populated database OK');
+							callback();
 
 						},
 						function(error) {

@@ -69,8 +69,8 @@
             </a>
     </nav>
     <nav class="mui-bar mui-bar-tab" id="nav-new">
-        <input type="text" v-model="task.name" class="mui-input-clear jam-task-input" style=" width: calc(100% - 55px); margin-top:5px" placeholder="">
-        <button type="button" class="mui-btn mui-btn-success">绿色</button>
+        <input type="text" v-model="task" class="mui-input-clear jam-task-input" style=" width: calc(100% - 55px); margin-top:5px" placeholder="">
+        <button type="button" class="mui-btn mui-btn-success" @click="add()">Add</button>
     </nav>
     <div class="mui-content" id="app">
         <div id="slider" class="mui-slider">
@@ -89,7 +89,7 @@
                                 <a class="mui-btn mui-btn-green" @click="moveTo(task,index,  'today' , $event  ) ">Add to Today</a>
                             </div>
                             <div class="mui-slider-handle">
-                                <input type="text" v-model="task.name" class="mui-input-clear jam-task-input" placeholder="">
+                                <input type="text" @change="updateTask(task)" v-model="task.name" class="mui-input-clear jam-task-input" placeholder="">
                             </div>
                         </li>
                     </ul>
@@ -102,7 +102,7 @@
                                 <a class="mui-btn mui-btn-green" @click="done(task,index,tasklist , $event ) ">Done</a>
                             </div>
                             <div class="mui-slider-handle">
-                                <input type="text" v-model="task.name" class="mui-input-clear jam-task-input" placeholder="">
+                                <input type="text" v-model="task.name" @change="updateTask(task)" class="mui-input-clear jam-task-input" placeholder="">
                             </div>
                         </li>
                     </ul>
