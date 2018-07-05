@@ -126,7 +126,6 @@ var myDB = (function() {
 				updateTask(task, table) {
 					db.sqlBatch([
 							["update " + table + " set name =  ? where taskId = ?  ", [task.name, task.taskId]]
-
 						], function() {
 							console.log('update to database OK');
 
@@ -136,8 +135,9 @@ var myDB = (function() {
 							//TODO: emmit error 
 						});
 				},
-				moveTaskBackTo(taskId, isDeleted, toToday) {
-					var sourceTable = isDeleted ? "tbl_task_deleted" : "tbl_task_completed";
+				moveTaskBackTo(taskId, sourceTable, toToday) {
+					// var sourceTable = fromHisotry ? (  isDeleted ? "tbl_task_deleted" : "tbl_task_completed" ) :
+					// 			;
 					var targetDate = toToday ? getNow() : getTomorrow();
 					db.sqlBatch([
 							["insert into  tbl_task select taskId,name,'" + targetDate + "' from " + sourceTable + " where taskId = ?  ", [taskId]],

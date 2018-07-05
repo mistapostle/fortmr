@@ -19,64 +19,24 @@ app = new Vue({
 				"displayName": "History",
 				"currentList": 'completedTasks',
 				"completedTasks": [
-					new Task("Hisotry task1 ", new Date()),
-					new Task("Hisotry task2 ", new Date()),
-					new Task("Hisotry task3 ", new Date()),
-					new Task("Hisotry task4 ", new Date())
-					/*,
-					new Task("Hisotry task1 ", new Date()),
-					new Task("Hisotry task2 ", new Date()),
-					new Task("Hisotry task3 ", new Date()),
-					new Task("Hisotry task4 ", new Date()),
-					new Task("Hisotry task1 ", new Date()),
-					new Task("Hisotry task2 ", new Date()),
-					new Task("Hisotry task3 ", new Date()),
-					new Task("Hisotry task4 ", new Date()),
-					new Task("Hisotry task1 ", new Date()),
-					new Task("Hisotry task2 ", new Date()),
-					new Task("Hisotry task3 ", new Date()),
-					new Task("Hisotry task4 ", new Date())
-					*/
 
 
 				],
 				"deletedTasks": [
-					new Task("Deleted task1 ", new Date()),
-					new Task("Deleted task2 ", new Date()),
-					new Task("Deleted task3 ", new Date()),
-					new Task("Deleted task4 ", new Date()),
-					new Task("Deleted task1 ", new Date()),
-					new Task("Deleted task2 ", new Date()),
-					new Task("Deleted task3 ", new Date()),
-					new Task("Deleted task4 ", new Date()),
-					new Task("Deleted task1 ", new Date()),
-					new Task("Deleted task2 ", new Date()),
-					new Task("Deleted task3 ", new Date()),
-					new Task("Deleted task4 ", new Date()),
-					new Task("Deleted task1 ", new Date()),
-					new Task("Deleted task2 ", new Date()),
-					new Task("Deleted task3 ", new Date()),
-					new Task("Deleted task14 ", new Date())
+
 				],
 			},
 			"today": {
 				"displayName": "Today",
 
-				"tasks": [new Task("Today task1 ", new Date()),
-					new Task("Today task2 ", new Date()),
-					new Task("Today task3 ", new Date()),
-					new Task("Today task4 ", new Date())
-				]
+				"tasks": []
 			},
 
 			"tomorrow": {
 				"displayName": "Tomorrow",
 
 				"tasks": [
-					new Task("Tomorrow task1 ", new Date()),
-					new Task("Tomorrow task2 ", new Date()),
-					new Task("Tomorrow task3 ", new Date()),
-					new Task("Tomorrow task4 ", new Date())
+
 				]
 
 			},
@@ -148,8 +108,22 @@ app = new Vue({
 			var self = this;
 
 			var historyList = self.taskStore['history']
-			this.db.moveTaskBackTo(task.taskId, historyList.currentList == 'deletedTasks', targetCategory == 'today');
-			historyList[historyList.currentList].splice(index, 1);
+
+			function _getSourceForHisotry() {
+				if (historyList.currentList == 'deletedTasks') {
+					return 'tbl_task_deleted'
+				}
+				return 'tbl_task_completed'
+			}
+
+			var sourceTable = this.currentCategory == 'history' ?
+				_getSourceForHisotry() : 'tbl_task';
+
+			this.db.moveTaskBackTo(task.taskId, sourceTable, targetCategory == 'today');
+			if (this.currentCategory == 'history')
+				historyList[historyList.currentList].splice(index, 1);
+			if (this.currentCategory != 'history')
+				this.taskStore[this.currentCategory].tasks.splice(index, 1);
 			self.taskStore[targetCategory].tasks.splice(0, 0, task);
 
 

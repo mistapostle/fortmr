@@ -11,6 +11,10 @@
     <link rel="stylesheet" href="css/mui.css">
     <!--App自定义的css mui-active-->
     <style type="text/css">
+    [v-cloak] {
+        display: none !important;
+    }
+
     input.jam-task-input {
         border: 0px;
         padding: 0px;
@@ -75,7 +79,7 @@
     <div class="mui-content" id="app">
         <div id="slider" class="mui-slider">
             <div id="sliderSegmentedControl" class="mui-slider-indicator mui-segmented-control mui-segmented-control-inverted">
-                <a class="mui-control-item" :href="'#div-' + category " v-for="(tasklist , category) in taskStore" @tap="switchToCategory(category)">
+                <a class="mui-control-item" :href="'#div-' + category " v-for="(tasklist , category) in taskStore" @tap="switchToCategory(category)" v-cloak>
                 {{ tasklist.displayName}}
             </a>
             </div>
@@ -100,6 +104,8 @@
                             </div>
                             <div class="mui-slider-right mui-disabled">
                                 <a class="mui-btn mui-btn-green" @click="done(task,index,tasklist , $event ) ">Done</a>
+                                <a v-show="category=='today'" class="mui-btn mui-btn-yellow" @click="moveTo(task,index, 'tomorrow' ,$event) ">Add to Tomorrow</a>
+                                <a v-show="category=='tomorrow'" class="mui-btn mui-btn-yellow" @click="moveTo(task,index,  'today' , $event  ) ">Add to Today</a>
                             </div>
                             <div class="mui-slider-handle">
                                 <input type="text" v-model="task.name" @change="updateTask(task)" class="mui-input-clear jam-task-input" placeholder="">
