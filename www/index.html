@@ -41,9 +41,9 @@
     .jam-title {
         font-family: Muiicons;
     }
-
+    
     div.jam-tab-content {
-        height: 100vh;
+        height: calc( 100vh - 132px) ; 
     }
     </style>
 </head>
@@ -77,41 +77,44 @@
         <button type="button" class="mui-btn mui-btn-success" @click="add()">Add</button>
     </nav>
     <div class="mui-content" id="app">
-        <div id="slider" class="mui-slider">
-            <div id="sliderSegmentedControl" class="mui-slider-indicator mui-segmented-control mui-segmented-control-inverted">
-                <a class="mui-control-item" :href="'#div-' + category " v-for="(tasklist , category) in taskStore" @tap="switchToCategory(category)" v-cloak>
+        <div>
+            <div id="segmentedControl" class="mui-segmented-control">
+                <a class="mui-control-item " :href="'#div-' + category " v-for="(tasklist , category) in taskStore" @tap="switchToCategory(category)"  v-bind:class="[{ 'mui-active': currentCategory == category }]" v-cloak>
                 {{ tasklist.displayName}}
             </a>
             </div>
-            <div id="sliderProgressBar" class="mui-slider-progress-bar mui-col-xs-4"></div>
-            <div class="mui-slider-group jam-tab-content">
-                <div v-for="(tasklist , category) in taskStore" :id="'div-'+ category " class="mui-slider-item mui-control-content  " v-bind:class="[{ 'mui-active': currentCategory == category }]">
-                    <ul class="mui-table-view ul-tasks" v-if="category=='history'">
-                        <li class="mui-table-view-cell" v-for="(task,index )  in tasklist[tasklist.currentList] ">
-                            <div class="mui-slider-right mui-disabled">
-                                <a class="mui-btn mui-btn-yellow" @click="moveTo(task,index, 'tomorrow' ,$event) ">Add to Tomorrow</a>
-                                <a class="mui-btn mui-btn-green" @click="moveTo(task,index,  'today' , $event  ) ">Add to Today</a>
-                            </div>
-                            <div class="mui-slider-handle">
-                                <input type="text" @change="updateTask(task)" v-model="task.name" class="mui-input-clear jam-task-input" placeholder="">
-                            </div>
-                        </li>
-                    </ul>
-                    <ul class="mui-table-view ul-tasks" v-if="category!='history'">
-                        <li class="mui-table-view-cell" v-for="(task,index )  in tasklist.tasks ">
-                            <div class="mui-slider-left mui-disabled">
-                                <a class="mui-btn mui-btn-red" @click="deleteTask(task,index,tasklist,$event)">Delete</a>
-                            </div>
-                            <div class="mui-slider-right mui-disabled">
-                                <a class="mui-btn mui-btn-green" @click="done(task,index,tasklist , $event ) ">Done</a>
-                                <a v-show="category=='today'" class="mui-btn mui-btn-yellow" @click="moveTo(task,index, 'tomorrow' ,$event) ">Add to Tomorrow</a>
-                                <a v-show="category=='tomorrow'" class="mui-btn mui-btn-yellow" @click="moveTo(task,index,  'today' , $event  ) ">Add to Today</a>
-                            </div>
-                            <div class="mui-slider-handle">
-                                <input type="text" v-model="task.name" @change="updateTask(task)" class="mui-input-clear jam-task-input" placeholder="">
-                            </div>
-                        </li>
-                    </ul>
+            <div>
+                <div v-for="(tasklist , category) in taskStore" :id="'div-'+ category " class="mui-control-content " v-bind:class="[{ 'mui-active': currentCategory == category }]" >
+                    <div class="mui-scroll-wrapper jam-tab-content">
+                        <div class="mui-scroll">
+                            <ul class="mui-table-view" v-if="category=='history'">
+                                <li class="mui-table-view-cell" v-for="(task,index )  in tasklist[tasklist.currentList] ">
+                                    <div class="mui-slider-right mui-disabled">
+                                        <a class="mui-btn mui-btn-yellow" @click="moveTo(task,index, 'tomorrow' ,$event) ">Add to Tomorrow</a>
+                                        <a class="mui-btn mui-btn-green" @click="moveTo(task,index,  'today' , $event  ) ">Add to Today</a>
+                                    </div>
+                                    <div class="mui-slider-handle">
+                                        <input type="text" @change="updateTask(task)" v-model="task.name" class="mui-input-clear jam-task-input" placeholder="">
+                                    </div>
+                                </li>
+                            </ul>
+                            <ul class="mui-table-view" v-if="category!='history'">
+                                <li class="mui-table-view-cell" v-for="(task,index )  in tasklist.tasks ">
+                                    <div class="mui-slider-left mui-disabled">
+                                        <a class="mui-btn mui-btn-red" @click="deleteTask(task,index,tasklist,$event)">Delete</a>
+                                    </div>
+                                    <div class="mui-slider-right mui-disabled">
+                                        <a class="mui-btn mui-btn-green" @click="done(task,index,tasklist , $event ) ">Done</a>
+                                        <a v-show="category=='today'" class="mui-btn mui-btn-yellow" @click="moveTo(task,index, 'tomorrow' ,$event) ">Add to Tomorrow</a>
+                                        <a v-show="category=='tomorrow'" class="mui-btn mui-btn-yellow" @click="moveTo(task,index,  'today' , $event  ) ">Add to Today</a>
+                                    </div>
+                                    <div class="mui-slider-handle">
+                                        <input type="text" v-model="task.name" @change="updateTask(task)" class="mui-input-clear jam-task-input" placeholder="">
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

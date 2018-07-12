@@ -162,9 +162,9 @@ var myDB = (function() {
 					}
 
 					var orderField = table == 'tbl_task' ? 'firstPlanDate' : 'closeDate';
-					var sql = "SELECT  * from " + table + wherecause + " order by " + orderField + " ASC LIMIT ? OFFSET ?";
+					var sql = "SELECT  * from " + table + wherecause + " order by " + orderField + " ASC   ";
 					console.log("fetch with sql ", sql);
-					db.executeSql(sql, [rowCount, offset], function(resultSet) {
+					db.executeSql(sql, [], function(resultSet) {
 						var data = [];
 						for (var i = 0; i < resultSet.rows.length; i++) {
 							data.push(new Task(resultSet.rows.item(i).name, resultSet.rows.item(i).firstPlanDate, resultSet.rows.item(i).taskId));
